@@ -6,10 +6,36 @@ __pycache__/
 .Python
 venv/
 .venv/
+ENV/
 env/
 .env
 pip-log.txt
 pip-delete-this-directory.txt
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Electron
+out/
+release/
 
 # IDE
 .vscode/
@@ -17,6 +43,7 @@ pip-delete-this-directory.txt
 *.swp
 *.swo
 *.sublime-*
+*~
 
 # Logs
 logs/
@@ -31,7 +58,12 @@ desktop.ini
 .claude/
 
 # Build outputs / Third-party
-dist/
-build/
-*.egg-info/
 mcp-servers/
+
+# Environment
+.env.local
+.env.production
+
+# FFmpeg temp files
+*.tmp
+*.temp
