@@ -1,0 +1,15 @@
+{
+    "download_path": "./downloads",
+    "proxy": "",
+    "youtube_api_key": "",
+    "bilibili_cookies": "",
+    "max_concurrent_downloads": 3,
+    "log_level": "INFO",
+    "video_download_path": "D:/Learning/Subtitles/Project/main/オッホ愛",
+    "video_download_format": "mp4",
+    "yt_dlp_path": "D:\\Learning\\Subtitles\\FFmpeg\\bin\\yt-dlp.exe",
+    "ffmpeg_path": "D:\\Learning\\Subtitles\\FFmpeg\\bin\\ffmpeg.exe",
+    "video_proxy_enabled": false,
+    "video_proxy_url": "http://127.0.0.1:7890",
+    "video_audio_format": "m4a"
+}
