@@ -4,17 +4,32 @@ import os
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
+# 延迟导入 path_utils，避免循环依赖问题
+# 注意：logger 初始化在模块级别，此时 global_config 应该已经加载
+def _get_log_dir() -> str:
+    """Get log directory, fallback to ./logs if not configured."""
+    try:
+        from utils.path_utils import get_log_dir
+        return get_log_dir()
+    except Exception:
+        # 如果导入失败（比如在打包后的环境），使用默认路径
+        return "./logs"
 
-def setup_logger(name: str = "SumiKara", log_dir: str = "./logs") -> logging.Logger:
+
+def setup_logger(name: str = "SumiKara", log_dir: str = None) -> logging.Logger:
     """Setup and return a logger with file and console output.
 
     Args:
         name: Logger name
-        log_dir: Directory to store log files
+        log_dir: Directory to store log files (default: use path_utils.get_log_dir())
 
     Returns:
         Configured logger instance
     """
+    # 如果未指定 log_dir，则使用 path_utils 获取
+    if log_dir is None:
+        log_dir = _get_log_dir()
+
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
 

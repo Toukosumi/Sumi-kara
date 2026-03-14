@@ -1,5 +1,5 @@
 """Module manager - manages all registered modules."""
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 from modules.base.module_base import ModuleBase
 from utils import logger

@@ -59,6 +59,13 @@ desktop.ini
 
 # Build outputs / Third-party
 mcp-servers/
+docs/
+TODO.md
+CLAUDE.md
+
+# External tools
+resources/
+tools/
 
 # Environment
 .env.local
@@ -67,3 +74,7 @@ mcp-servers/
 # FFmpeg temp files
 *.tmp
 *.temp
+
+# config/global.json 包含用户隐私配置
+config/global.json
+

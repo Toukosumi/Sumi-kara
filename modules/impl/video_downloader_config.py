@@ -15,9 +15,9 @@ class VideoDownloaderConfig:
     CONFIG_KEY_PROXY_ENABLED = "video_proxy_enabled"
     CONFIG_KEY_PROXY_URL = "video_proxy_url"
 
-    # 默认配置值
-    DEFAULT_YT_DLP_PATH = r"D:\Learning\Subtitles\FFmpeg\bin\yt-dlp.exe"
-    DEFAULT_FFMPEG_PATH = r"D:\Learning\Subtitles\FFmpeg\bin\ffmpeg.exe"
+    # 默认配置值（空字符串表示由 tool_manager 自动获取）
+    DEFAULT_YT_DLP_PATH = ""
+    DEFAULT_FFMPEG_PATH = ""
     DEFAULT_FORMAT = "mp4"
     DEFAULT_AUDIO_FORMAT = "mp3"
     DEFAULT_DOWNLOAD_PATH = "./downloads"
@@ -55,6 +55,10 @@ class VideoDownloaderConfig:
         Returns:
             路径是否有效
         """
+        # 如果路径为空，尝试从 tool_manager 获取
+        if not path or not path.strip():
+            from utils.tool_manager import ToolManager
+            path = ToolManager.get_yt_dlp_path()
         return os.path.isfile(path) and path.endswith('.exe')
 
     @classmethod
@@ -67,6 +71,10 @@ class VideoDownloaderConfig:
         Returns:
             路径是否有效
         """
+        # 如果路径为空，尝试从 tool_manager 获取
+        if not path or not path.strip():
+            from utils.tool_manager import ToolManager
+            path = ToolManager.get_ffmpeg_path()
         return os.path.isfile(path) and path.endswith('.exe')
 
     @classmethod
@@ -87,6 +95,21 @@ class VideoDownloaderConfig:
             return True
         except (OSError, PermissionError):
             return False
+
+    @classmethod
+    def get_default_download_path(cls) -> str:
+        """获取默认下载路径
+
+        逻辑：
+        - 如果有历史配置（video_download_path），使用历史值
+        - 否则返回桌面路径
+        """
+        from config.global_config import global_config
+        history_path = global_config.get(cls.CONFIG_KEY_DOWNLOAD_PATH)
+        if history_path and history_path.strip():
+            return history_path
+        # 返回桌面路径
+        return os.path.join(os.path.expanduser("~"), "Desktop").replace("\\", "/")
 
     @classmethod
     def validate_format(cls, format_str: str, is_audio: bool = False) -> bool:

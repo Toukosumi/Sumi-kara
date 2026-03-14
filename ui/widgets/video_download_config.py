@@ -1,7 +1,7 @@
 """Video downloader configuration widget."""
 from typing import Optional, List
 
-from PyQt5.QtCore import Qt, pyqtSlot, QEvent, QTimer
+from PyQt5.QtCore import Qt, pyqtSlot, QEvent
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QLineEdit, QPushButton, QComboBox, QProgressBar,
@@ -13,18 +13,12 @@ from config.global_config import global_config
 from modules.impl.video_downloader import VideoDownloaderModule
 from modules.impl.video_downloader_config import VideoDownloaderConfig
 from modules.impl.video_format_parser import VideoFormatInfo
+from ui.components import ThemeColors
 from utils import logger
 
 
 class VideoDownloaderConfigWidget(QWidget):
     """视频下载配置界面"""
-
-    # ===== 浅色主题颜色变量 =====
-    LIGHT_BG = "#f5f5f5"
-    LIGHT_CARD = "#ffffff"
-    LIGHT_BORDER = "#e0e0e0"
-    TEXT_COLOR = "#212529"
-    TEXT_SECONDARY = "#6c757d"
 
     # 支持的视频格式（默认选项 - 只保留最高质量MP4）
     VIDEO_FORMATS = [
@@ -63,6 +57,11 @@ class VideoDownloaderConfigWidget(QWidget):
             self.updateGeometry()
         super().changeEvent(event)
 
+    def showEvent(self, event):
+        """每次显示时重新加载配置"""
+        super().showEvent(event)
+        self._load_config()
+
     def setFontSize(self, size: int):
         """设置字体大小"""
         from PyQt5.QtGui import QFont
@@ -99,16 +98,16 @@ class VideoDownloaderConfigWidget(QWidget):
     # ===== 样式定义 =====
     CARD_STYLE = f"""
         QFrame {{
-            background-color: {LIGHT_CARD};
+            background-color: {ThemeColors.LIGHT_CARD};
             border-radius: 8px;
             padding: 12px;
-            border: 1px solid {LIGHT_BORDER};
+            border: 1px solid {ThemeColors.LIGHT_BORDER};
         }}
     """
 
     LABEL_TITLE_STYLE = f"""
         QLabel {{
-            color: {TEXT_COLOR};
+            color: {ThemeColors.TEXT_COLOR};
             font-size: 13px;
             font-weight: bold;
         }}
@@ -116,7 +115,7 @@ class VideoDownloaderConfigWidget(QWidget):
 
     LABEL_STYLE = f"""
         QLabel {{
-            color: {TEXT_SECONDARY};
+            color: {ThemeColors.TEXT_SECONDARY};
             font-size: 12px;
         }}
     """
@@ -130,15 +129,15 @@ class VideoDownloaderConfigWidget(QWidget):
             border-radius: 6px;
             padding: 10px 20px;
             background: qlineargradient(x1:0, y1:0, x1:1, y1:0,
-                stop:0 #667eea, stop:1 #764ba2);
+                stop:0 {ThemeColors.PRIMARY_PURPLE}, stop:1 {ThemeColors.PRIMARY_PURPLE_END});
         }}
         QPushButton:hover {{
             background: qlineargradient(x1:0, y1:0, x1:1, y1:0,
-                stop:0 #7a8ff0, stop:1 #8a5cb3);
+                stop:0 {ThemeColors.PRIMARY_PURPLE}dd, stop:1 {ThemeColors.PRIMARY_PURPLE_END}dd);
         }}
         QPushButton:pressed {{
             background: qlineargradient(x1:0, y1:0, x1:1, y1:0,
-                stop:0 #5a6fca, stop:1 #6a3d90);
+                stop:0 {ThemeColors.PRIMARY_PURPLE}aa, stop:1 {ThemeColors.PRIMARY_PURPLE_END}aa);
         }}
         QPushButton:disabled {{
             background: #cccccc;
@@ -155,15 +154,15 @@ class VideoDownloaderConfigWidget(QWidget):
             border-radius: 6px;
             padding: 10px 20px;
             background: qlineargradient(x1:0, y1:0, x1:1, y1:0,
-                stop:0 #11998e, stop:1 #38ef7d);
+                stop:0 {ThemeColors.PRIMARY_GREEN}, stop:1 {ThemeColors.PRIMARY_GREEN_END});
         }}
         QPushButton:hover {{
             background: qlineargradient(x1:0, y1:0, x1:1, y1:0,
-                stop:0 #20aaa0, stop:1 #4aff8e);
+                stop:0 {ThemeColors.PRIMARY_GREEN}dd, stop:1 {ThemeColors.PRIMARY_GREEN_END}dd);
         }}
         QPushButton:pressed {{
             background: qlineargradient(x1:0, y1:0, x1:1, y1:0,
-                stop:0 #0f877e, stop:1 #2edf6d);
+                stop:0 {ThemeColors.PRIMARY_GREEN}aa, stop:1 {ThemeColors.PRIMARY_GREEN_END}aa);
         }}
         QPushButton:disabled {{
             background: #cccccc;
@@ -174,18 +173,18 @@ class VideoDownloaderConfigWidget(QWidget):
     # 辅助按钮 - 灰色
     SECONDARY_BUTTON_STYLE = f"""
         QPushButton {{
-            color: #333333;
+            color: {ThemeColors.TEXT_COLOR};
             font-weight: bold;
-            border: 1px solid #cccccc;
+            border: 1px solid {ThemeColors.LIGHT_BORDER};
             border-radius: 4px;
             padding: 8px 16px;
-            background-color: #f8f9fa;
+            background-color: {ThemeColors.LIGHT_CARD};
         }}
         QPushButton:hover {{
-            background-color: #e9ecef;
+            background-color: {ThemeColors.LIGHT_BG};
         }}
         QPushButton:pressed {{
-            background-color: #dee2e6;
+            background-color: {ThemeColors.LIGHT_BORDER};
         }}
     """
 
@@ -194,14 +193,14 @@ class VideoDownloaderConfigWidget(QWidget):
         QProgressBar {{
             border: none;
             border-radius: 6px;
-            background-color: #e0e0e0;
+            background-color: {ThemeColors.LIGHT_BORDER};
             text-align: left;
             padding-left: 0px;
         }}
         QProgressBar::chunk {{
             border-radius: 6px;
             background: qlineargradient(x1:0, y1:0, x1:1, y1:0,
-                stop:0 #1976d2, stop:1 #42a5f5);
+                stop:0 {ThemeColors.PRIMARY_BLUE}, stop:1 {ThemeColors.PRIMARY_BLUE_END});
         }}
     """
 
@@ -210,14 +209,14 @@ class VideoDownloaderConfigWidget(QWidget):
         QProgressBar {{
             border: none;
             border-radius: 6px;
-            background-color: #e0e0e0;
+            background-color: {ThemeColors.LIGHT_BORDER};
             text-align: left;
             padding-left: 0px;
         }}
         QProgressBar::chunk {{
             border-radius: 6px;
             background: qlineargradient(x1:0, y1:0, x1:1, y1:0,
-                stop:0 #11998e, stop:1 #38ef7d);
+                stop:0 {ThemeColors.PRIMARY_GREEN}, stop:1 {ThemeColors.PRIMARY_GREEN_END});
         }}
     """
 
@@ -301,7 +300,7 @@ class VideoDownloaderConfigWidget(QWidget):
         # ===== 分隔线 =====
         separator = QFrame()
         separator.setFrameShape(QFrame.HLine)
-        separator.setStyleSheet(f"background-color: {self.LIGHT_BORDER}; min-height: 1px;")
+        separator.setStyleSheet(f"background-color: {ThemeColors.LIGHT_BORDER}; min-height: 1px;")
         layout.addWidget(separator)
 
         # ===== 格式选择区域 - 左右排列 =====
@@ -368,12 +367,15 @@ class VideoDownloaderConfigWidget(QWidget):
 
     def _load_config(self):
         """加载保存的配置"""
-        # 加载下载路径
-        download_path = global_config.get(
-            VideoDownloaderConfig.CONFIG_KEY_DOWNLOAD_PATH,
-            VideoDownloaderConfig.DEFAULT_DOWNLOAD_PATH
-        )
+        # 强制重新加载配置文件，确保获取最新值
+        global_config._load()
+
+        # 加载下载路径，使用新的 get_default_download_path 方法
+        download_path = VideoDownloaderConfig.get_default_download_path()
         self.path_input.setText(download_path)
+
+        # 打印日志便于调试
+        logger.info(f"加载保存路径: {download_path}")
 
         # 加载视频格式
         video_format = global_config.get(
@@ -413,7 +415,6 @@ class VideoDownloaderConfigWidget(QWidget):
         self._module.parse_finished.connect(self._on_parse_finished)
         self._module.progress_updated.connect(self._on_progress_updated)
         self._module.download_finished.connect(self._on_download_finished)
-        self._module.status_changed.connect(self._on_status_changed)
 
     @pyqtSlot()
     def _on_paste_clicked(self):
@@ -446,22 +447,22 @@ class VideoDownloaderConfigWidget(QWidget):
         self.parse_progress.setVisible(True)
         self.parse_progress.setValue(0)
         self.url_input.setEnabled(False)
+        # 强制刷新 UI
+        self.repaint()
 
     @pyqtSlot()
     def _on_parse_started(self):
         """解析开始"""
         logger.info("开始解析视频格式...")
         self.parse_progress.setVisible(True)
-        self.status_label.setVisible(False)
-        self.status_label.setText("")
+        # 强制刷新 UI
+        self.repaint()
 
     @pyqtSlot(bool, str, list, list)
     def _on_parse_finished(self, success: bool, message: str, video_formats: list, audio_formats: list):
         """解析完成"""
-        # 隐藏解析进度条和清空状态
+        # 隐藏解析进度条
         self.parse_progress.setVisible(False)
-        self.status_label.setVisible(False)
-        self.status_label.setText("")
 
         # 更新UI状态
         self.parse_button.setEnabled(True)
@@ -485,7 +486,6 @@ class VideoDownloaderConfigWidget(QWidget):
     def _update_format_combos(self):
         """更新格式下拉框，添加解析到的格式"""
         # 添加分隔符和解析到的格式到视频格式下拉框
-        current_video_index = self.format_combo.currentIndex()
         current_video_value = self.format_combo.currentData()
 
         # 清除现有选项，保留默认选项
@@ -495,7 +495,7 @@ class VideoDownloaderConfigWidget(QWidget):
 
         # 添加解析到的格式
         if self._parsed_video_formats:
-            self.format_combo.addItem("格式    分辨率     帧率   文件大小", "")
+            self.format_combo.addItem("格式    分辨率         帧率     文件大小", "")
             for fmt in self._parsed_video_formats:
                 # 根据分辨率位数添加额外空格
                 extra_spaces = self._get_resolution_extra_spaces(fmt.resolution)
@@ -518,7 +518,7 @@ class VideoDownloaderConfigWidget(QWidget):
             self.audio_format_combo.addItem(text, value)
 
         if self._parsed_audio_formats:
-            self.audio_format_combo.addItem("格式        文件大小", "")
+            self.audio_format_combo.addItem("格式    文件大小", "")
             for fmt in self._parsed_audio_formats:
                 # 显示格式: 格式 文件大小
                 display_text = f"{fmt.ext.lower():<3}    {fmt.filesize}"
@@ -582,6 +582,8 @@ class VideoDownloaderConfigWidget(QWidget):
         # 显示下载进度条
         self.download_progress.setVisible(True)
         self.download_progress.setValue(0)
+        # 强制刷新 UI
+        self.repaint()
 
     @pyqtSlot()
     def _on_select_path(self):
@@ -602,22 +604,21 @@ class VideoDownloaderConfigWidget(QWidget):
         """更新下载进度显示"""
         if not self.download_progress.isVisible():
             self.download_progress.setVisible(True)
-            self.status_label.setVisible(True)
+            # 强制刷新布局
+            self.repaint()
 
         # 更新进度条值 (0-100)
         self.download_progress.setValue(int(progress * 100))
 
-        # 更新状态消息
-        if message:
-            self.status_label.setText(message)
+        # 强制刷新 UI
+        self.repaint()
 
     @pyqtSlot(str, bool, str)
     def _on_download_finished(self, url: str, success: bool, message: str):
         """下载完成"""
-        # 隐藏进度条和状态
+        # 隐藏进度条
         self.download_progress.setVisible(False)
         self.download_progress.setValue(0)
-        self.status_label.setVisible(False)
 
         # 更新UI状态
         self.download_button.setEnabled(True)
@@ -629,9 +630,3 @@ class VideoDownloaderConfigWidget(QWidget):
         else:
             QMessageBox.warning(self, "下载失败", message)
 
-    @pyqtSlot(str)
-    def _on_status_changed(self, status: str):
-        """状态变化"""
-        if status:
-            self.status_label.setVisible(True)
-            self.status_label.setText(status)

@@ -1,5 +1,5 @@
 """Main window with TabBar for module switching."""
-from typing import Dict, Optional
+from typing import Dict
 
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtWidgets import (
@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Sumi-Kara 多功能工具")
         # 默认窗口大小缩小一点
-        self.resize(700, 500)
+        self.resize(700, 540)
         # 最小窗口大小
         self.setMinimumSize(600, 400)
         # 允许窗口自由缩放

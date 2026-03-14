@@ -2,11 +2,14 @@
 import os
 import re
 from typing import Optional
-from urllib.parse import urlparse
 
 from PyQt5.QtCore import QThread, pyqtSignal, QProcess
 
 from utils import logger
+from utils.url_utils import (
+    is_bilibili_url,
+    should_use_proxy
+)
 
 
 class VideoDownloadWorker(QThread):
@@ -16,9 +19,6 @@ class VideoDownloadWorker(QThread):
     progress_updated = pyqtSignal(float, str)  # 进度(0-1), 状态消息
     download_finished = pyqtSignal(str, bool, str)  # url, 成功标志, 消息
     status_changed = pyqtSignal(str)  # 状态变化
-
-    # YouTube 域名列表
-    YOUTUBE_DOMAINS = ['youtube.com', 'youtu.be', 'youtube-nocookie.com']
 
     def __init__(
         self,
@@ -43,8 +43,8 @@ class VideoDownloadWorker(QThread):
             proxy_enabled: 是否启用代理
             proxy_url: 代理地址
             video_format_id: 指定的视频格式ID（可选）
-            指定的音频格式ID（可选）
- audio_format_id:        """
+            audio_format_id: 指定的音频格式ID（可选）
+        """
         super().__init__()
         self._url = url
         self._download_path = download_path
@@ -175,59 +175,13 @@ class VideoDownloadWorker(QThread):
 
         return args
 
-    # B站域名列表
-    BILIBILI_DOMAINS = ['bilibili.com', 'b23.tv']
-
     def _should_use_proxy(self, url: str) -> bool:
-        """判断 URL 是否需要使用代理
-
-        Args:
-            url: 视频URL
-
-        Returns:
-            是否需要代理
-        """
-        if not self._proxy_enabled:
-            return False
-
-        try:
-            parsed = urlparse(url)
-            domain = parsed.netloc.lower()
-
-            # 移除端口号
-            if ':' in domain:
-                domain = domain.split(':')[0]
-
-            # 检查是否匹配 YouTube 域名
-            for yt_domain in self.YOUTUBE_DOMAINS:
-                if yt_domain in domain or domain.endswith(yt_domain):
-                    return True
-
-            return False
-        except Exception as e:
-            logger.warning(f"解析URL域名失败: {url}, 错误: {e}")
-            return False
+        """判断 URL 是否需要使用代理"""
+        return should_use_proxy(url, self._proxy_enabled)
 
     def _is_bilibili_url(self, url: str) -> bool:
-        """判断是否是B站URL
-
-        Args:
-            url: 视频URL
-
-        Returns:
-            是否是B站
-        """
-        try:
-            parsed = urlparse(url)
-            domain = parsed.netloc.lower()
-            if ':' in domain:
-                domain = domain.split(':')[0]
-            for bili_domain in self.BILIBILI_DOMAINS:
-                if bili_domain in domain or domain.endswith(bili_domain):
-                    return True
-            return False
-        except:
-            return False
+        """判断是否是B站URL"""
+        return is_bilibili_url(url)
 
     def _handle_output(self):
         """处理进程输出 - 解析进度"""

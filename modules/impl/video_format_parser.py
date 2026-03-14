@@ -1,12 +1,17 @@
 """Video format parser worker - 使用 yt-dlp -F 解析视频格式."""
 import os
 import re
-from typing import Dict, List, Optional
-from urllib.parse import urlparse
+from typing import List, Optional
 
 from PyQt5.QtCore import QThread, pyqtSignal, QProcess
 
 from utils import logger
+from utils.url_utils import (
+    YOUTUBE_DOMAINS,
+    BILIBILI_DOMAINS,
+    is_bilibili_url,
+    should_use_proxy
+)
 
 
 class VideoFormatInfo:
@@ -61,11 +66,6 @@ class VideoFormatParser(QThread):
     parse_started = pyqtSignal()  # 开始解析
     parse_finished = pyqtSignal(bool, str, list, list)  # 成功标志, 消息, 视频格式列表, 音频格式列表
     status_changed = pyqtSignal(str)  # 状态变化
-
-    # YouTube 域名列表
-    YOUTUBE_DOMAINS = ['youtube.com', 'youtu.be', 'youtube-nocookie.com']
-    # B站域名列表
-    BILIBILI_DOMAINS = ['bilibili.com', 'b23.tv']
 
     def __init__(
         self,
@@ -140,9 +140,10 @@ class VideoFormatParser(QThread):
             "--no-color",             # 不使用颜色
         ]
 
-        # 添加 ffmpeg 路径（如果存在）
-        from config.global_config import global_config
-        ffmpeg_path = global_config.get("ffmpeg_path", "")
+        # 添加 ffmpeg 路径（如果存在）- 使用 tool_manager 获取
+        from utils.tool_manager import ToolManager
+        tool_paths = ToolManager.get_tool_paths()
+        ffmpeg_path = tool_paths.get("ffmpeg_path", "")
         if ffmpeg_path and os.path.exists(ffmpeg_path):
             args.extend(["--ffmpeg-location", os.path.dirname(ffmpeg_path)])
 
@@ -163,35 +164,11 @@ class VideoFormatParser(QThread):
 
     def _should_use_proxy(self, url: str) -> bool:
         """判断 URL 是否需要使用代理"""
-        if not self._proxy_enabled:
-            return False
-
-        try:
-            parsed = urlparse(url)
-            domain = parsed.netloc.lower()
-            if ':' in domain:
-                domain = domain.split(':')[0]
-
-            for yt_domain in self.YOUTUBE_DOMAINS:
-                if yt_domain in domain or domain.endswith(yt_domain):
-                    return True
-            return False
-        except Exception:
-            return False
+        return should_use_proxy(url, self._proxy_enabled)
 
     def _is_bilibili_url(self, url: str) -> bool:
         """判断是否是B站URL"""
-        try:
-            parsed = urlparse(url)
-            domain = parsed.netloc.lower()
-            if ':' in domain:
-                domain = domain.split(':')[0]
-            for bili_domain in self.BILIBILI_DOMAINS:
-                if bili_domain in domain or domain.endswith(bili_domain):
-                    return True
-            return False
-        except:
-            return False
+        return is_bilibili_url(url)
 
     def _handle_output(self):
         """处理进程输出 - 解析格式信息"""

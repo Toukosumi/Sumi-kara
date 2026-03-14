@@ -101,14 +101,11 @@ class VideoDownloaderModule(QObject, ModuleBase):
             VideoDownloaderConfig.CONFIG_KEY_VIDEO_FORMAT,
             VideoDownloaderConfig.DEFAULT_FORMAT
         )
-        yt_dlp_path = global_config.get(
-            VideoDownloaderConfig.CONFIG_KEY_YT_DLP_PATH,
-            VideoDownloaderConfig.DEFAULT_YT_DLP_PATH
-        )
-        ffmpeg_path = global_config.get(
-            VideoDownloaderConfig.CONFIG_KEY_FFMPEG_PATH,
-            VideoDownloaderConfig.DEFAULT_FFMPEG_PATH
-        )
+        # 使用 tool_manager 获取工具路径（优先从配置获取，否则自动获取）
+        from utils.tool_manager import ToolManager
+        tool_paths = ToolManager.get_tool_paths()
+        yt_dlp_path = tool_paths["yt_dlp_path"]
+        ffmpeg_path = tool_paths["ffmpeg_path"]
         proxy_enabled = global_config.get(VideoDownloaderConfig.CONFIG_KEY_PROXY_ENABLED, True)
         proxy_url = global_config.get(
             VideoDownloaderConfig.CONFIG_KEY_PROXY_URL,
@@ -168,11 +165,10 @@ class VideoDownloaderModule(QObject, ModuleBase):
         if self._current_worker is not None and self._current_worker.isRunning():
             return {"status": "error", "message": "已有下载任务在进行中"}
 
-        # 获取配置
-        yt_dlp_path = global_config.get(
-            VideoDownloaderConfig.CONFIG_KEY_YT_DLP_PATH,
-            VideoDownloaderConfig.DEFAULT_YT_DLP_PATH
-        )
+        # 获取配置 - 使用 tool_manager 获取工具路径
+        from utils.tool_manager import ToolManager
+        tool_paths = ToolManager.get_tool_paths()
+        yt_dlp_path = tool_paths["yt_dlp_path"]
         proxy_enabled = global_config.get(VideoDownloaderConfig.CONFIG_KEY_PROXY_ENABLED, True)
         proxy_url = global_config.get(
             VideoDownloaderConfig.CONFIG_KEY_PROXY_URL,

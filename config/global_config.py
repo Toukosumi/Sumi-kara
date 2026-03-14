@@ -1,7 +1,7 @@
 """Global configuration management."""
 import json
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from utils import logger
 
@@ -11,12 +11,18 @@ class GlobalConfig:
 
     # 基础默认配置
     BASE_DEFAULT_CONFIG: Dict[str, Any] = {
+        "file_path": "",  # 首次运行时会自动设置为 %APPDATA%/Sumi-Kara
+        "is_first_run": True,
         "download_path": "./downloads",
         "proxy": "",
         "youtube_api_key": "",
         "bilibili_cookies": "",
         "max_concurrent_downloads": 3,
-        "log_level": "INFO"
+        "max_workers": 3,
+        "auto_check_update": True,
+        "log_level": "INFO",
+        "ffmpeg_path": "",
+        "yt_dlp_path": ""
     }
 
     # 模块级默认配置
@@ -48,10 +54,26 @@ class GlobalConfig:
         module_defaults = cls.MODULE_DEFAULT_CONFIGS.get(module_name, {})
         return module_defaults.get(key, default)
 
-    def __init__(self, config_path: str = "./config/global.json"):
+    def __init__(self, config_path: str = None):
+        # 自动确定配置文件路径
+        if config_path is None:
+            config_path = self._get_default_config_path()
         self.config_path = config_path
         self.config: Dict[str, Any] = {}
         self._load()
+
+    @classmethod
+    def _get_default_config_path(cls) -> str:
+        """获取默认配置文件路径
+
+        统一使用: %APPDATA%/Sumi-Kara/config/global.json
+        这样开发环境和打包环境行为一致
+        """
+        appdata = os.environ.get("APPDATA", "")
+        if appdata:
+            return os.path.join(appdata, "Sumi-Kara", "config", "global.json").replace("\\", "/")
+        # 备用：使用项目目录
+        return "./config/global.json"
 
     def _load(self):
         """Load configuration from file."""
@@ -99,6 +121,26 @@ class GlobalConfig:
 
         return default
 
+    def __setitem__(self, key: str, value: Any):
+        """Set configuration value (dict-like interface).
+
+        Args:
+            key: 配置键名
+            value: 配置值
+        """
+        self.config[key] = value
+
+    def __getitem__(self, key: str) -> Any:
+        """Get configuration value (dict-like interface).
+
+        Args:
+            key: 配置键名
+
+        Returns:
+            配置值
+        """
+        return self.get(key)
+
     def set(self, key: str, value: Any):
         """Set configuration value and save.
 
@@ -107,6 +149,10 @@ class GlobalConfig:
             value: 配置值
         """
         self.config[key] = value
+        self._save()
+
+    def save(self):
+        """Save configuration to file."""
         self._save()
 
     def get_all(self) -> Dict[str, Any]:

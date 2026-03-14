@@ -2,11 +2,10 @@
 import sys
 
 from app import create_app
-from modules.impl.bilibili_uploader import BilibiliUploaderModule
 from modules.impl.lyric_downloader import LyricDownloaderModule
 from modules.impl.lyric_merger import LyricMergerModule
 from modules.impl.video_downloader import VideoDownloaderModule
-from modules.impl.youtube_uploader import YouTubeUploaderModule
+from modules.impl.settings import SettingsModule
 from modules.manager import module_manager
 from ui.main_window import MainWindow
 from utils import logger
@@ -18,8 +17,7 @@ def register_modules():
         VideoDownloaderModule(),
         LyricDownloaderModule(),
         LyricMergerModule(),
-        YouTubeUploaderModule(),
-        BilibiliUploaderModule(),
+        SettingsModule(),
     ]
 
     for module in modules:
@@ -37,7 +35,7 @@ def main():
     # Register modules
     register_modules()
 
-    # Create application
+    # Create application (必须在任何 Qt widget 之前创建)
     app = create_app()
 
     # Create and show main window
@@ -45,11 +43,14 @@ def main():
 
     # 设置窗口居中显示
     from PyQt5.QtWidgets import QDesktopWidget
-    screen = QDesktopWidget().screenGeometry()
-    window_geometry = window.geometry()
-    x = (screen.width() - window_geometry.width()) // 2
-    y = (screen.height() - window_geometry.height()) // 2
-    window.move(x, y)
+    try:
+        screen = QDesktopWidget().screenGeometry()
+        window_geometry = window.geometry()
+        x = (screen.width() - window_geometry.width()) // 2
+        y = (screen.height() - window_geometry.height()) // 2
+        window.move(x, y)
+    except Exception as e:
+        logger.warning(f"窗口居中设置失败: {e}")
 
     window.show()
     window.raise_()  # 提升窗口到前台
